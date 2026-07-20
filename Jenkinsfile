@@ -9,7 +9,6 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = 'souravpanda/java-docker-ci-cd-pipeline'
-        IMAGE_TAG = "${1}"
     }
 
     stages {
@@ -30,8 +29,8 @@ pipeline {
             steps {
                 sh '''
                     docker build \
-                    -t ${souravpanda/java-docker-ci-cd-pipeline}:${1} \
-                    -t ${souravpanda/java-docker-ci-cd-pipeline}:latest .
+                    -t "$DOCKER_IMAGE:$BUILD_NUMBER" \
+                    -t "$DOCKER_IMAGE:latest" .
                 '''
             }
         }
@@ -41,18 +40,18 @@ pipeline {
                 withCredentials([
                     usernamePassword(
                         credentialsId: 'dockerHubCred',
-                        usernameVariable: 'souravpanda',
+                        usernameVariable: 'DOCKER_USERNAME',
                         passwordVariable: 'DOCKER_PASSWORD'
                     )
                 ]) {
 
                     sh '''
                         echo "$DOCKER_PASSWORD" | docker login \
-                        -u "souravpanda" \
+                        -u "$DOCKER_USERNAME" \
                         --password-stdin
 
-                        docker push ${souravpanda/java-docker-ci-cd-pipeline}:${1}
-                        docker push ${souravpanda/java-docker-ci-cd-pipeline}:latest
+                        docker push "$DOCKER_IMAGE:$BUILD_NUMBER"
+                        docker push "$DOCKER_IMAGE:latest"
                     '''
                 }
             }
